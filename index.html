@@ -1,6 +1,6 @@
 <!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Advanced Home Services Invoice</title>
-<!-- v3 (2026-09-16): built for a technician on an iPhone. Adds a finger-drawn signature pad (canvas, copied into the PDF/print via html2canvas onclone), a Send invoice button that shares the PDF through the iOS share sheet when available and falls back to saving the PDF plus a mailto with the summary, a Sent invoices list (signature not saved) above Pending, a rewritten DispatchMe/Frontdoor paste reader that understands the job-page, confirmation-email and work-order-email layouts, and plain-language labels throughout. v2 untouched in the vault original. v4 (2026-09-17, his review): sheet at the very top, header and paste reader retired from view, customer email and a bigger Completed/Pending toggle below the sheet, a blue Mark as pending button left of Send that files the whole form into the Pending list, Pending listed above Sent. v4.1 (2026-09-17, same review): three main buttons, Mark as pending, Send invoice, green Mark completed, which files the invoice under Completed invoices and starts the next; Print, Save PDF and Office copy moved to a smaller second row. v4.2: pending rows show the follow-up date instead of a day count. v5 (2026-09-17, the owner's phone review): a tall one field per line entry form above the sheet, in his order (service location, billing, job, equipment, parts, labor, service performed, general condition, payment, signature, customer email), every field writing straight into the paper sheet which stays canonical; the authorization signature moved to a full screen pop up pad that copies onto the sheet canvas on Done; the paper sheet kept below as a scaled read only Preview at phone width and still captured full size for the PDF; Send now carries the customer and the office address together (mailto to customer with the office on CC, both addresses on the first line of the share text and copied to the clipboard), with Office copy by email untouched; the separate customer email field below the sheet retired into the form. -->
+<!-- v3 (2026-09-16): built for a technician on an iPhone. Adds a finger-drawn signature pad (canvas, copied into the PDF/print via html2canvas onclone), a Send invoice button that shares the PDF through the iOS share sheet when available and falls back to saving the PDF plus a mailto with the summary, a Sent invoices list (signature not saved) above Pending, a rewritten DispatchMe/Frontdoor paste reader that understands the job-page, confirmation-email and work-order-email layouts, and plain-language labels throughout. v2 untouched in the vault original. v4 (2026-09-17, his review): sheet at the very top, header and paste reader retired from view, customer email and a bigger Completed/Pending toggle below the sheet, a blue Mark as pending button left of Send that files the whole form into the Pending list, Pending listed above Sent. v4.1 (2026-09-17, same review): three main buttons, Mark as pending, Send invoice, green Mark completed, which files the invoice under Completed invoices and starts the next; Print, Save PDF and Office copy moved to a smaller second row. v4.2: pending rows show the follow-up date instead of a day count. v5 (2026-09-17, the owner's phone review): a tall one field per line entry form above the sheet, in his order (service location, billing, job, equipment, parts, labor, service performed, general condition, payment, signature, customer email), every field writing straight into the paper sheet which stays canonical; the authorization signature moved to a full screen pop up pad that copies onto the sheet canvas on Done; the paper sheet kept below as a scaled read only Preview at phone width and still captured full size for the PDF; Send now carries the customer and the office address together (mailto to customer with the office on CC, both addresses on the first line of the share text and copied to the clipboard), with Office copy by email untouched; the separate customer email field below the sheet retired into the form. v5.1 (2026-09-17, his next two): notes for the office, typed at the bottom of the entry form, never printed on the invoice but carried into every email and share as a NOTES block and saved with the pending and completed records; and the signature box on the sheet made deeper by twelve pixels with the signing line moved down eight, so there is more room to scribble without moving the X, the caption or the signed stamp. -->
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="AHS Invoice">
@@ -155,7 +155,7 @@ textarea.paste:focus{border-color:var(--a);outline:none}
 .s-sign .ln{flex:1;border-bottom:1px solid #000;height:20px}
 .s-sign .cap{font-size:8px;font-weight:700;letter-spacing:.5px;white-space:nowrap;padding-bottom:2px}
 .sig-wrap{flex:1;position:relative}
-.sig-canvas{width:100%;height:44px;display:block;touch-action:none;cursor:crosshair}
+.sig-canvas{width:100%;height:56px;display:block;touch-action:none;cursor:crosshair}
 .sig-stamp{font-size:8px;color:#333;min-height:10px;margin-top:1px}
 .sig-clear{background:none;border:1px solid #999;color:#333;border-radius:5px;padding:2px 8px;font-size:9px;cursor:pointer;white-space:nowrap}
 
@@ -366,6 +366,11 @@ body.capturing .sheet-scale-inner{transform:none !important;position:absolute;to
   <div class="fcard">
     <h3>Customer email</h3>
     <div class="f-row"><label>Customer email (for sending)</label><input id="custEmail" type="email" inputmode="email" autocomplete="off" placeholder="customer@example.com"></div>
+  </div>
+
+  <div class="fcard">
+    <h3>Notes for the office</h3>
+    <div class="f-row"><label>Notes (sent with the email, not printed on the invoice)</label><textarea id="invNotes" placeholder="Anything the office should know"></textarea></div>
   </div>
 </div>
 
@@ -789,7 +794,7 @@ let sigCtxCache=null,sigDrawing=false,sigMoved=false,sigHasInk=false,sigSignedAt
 function initSignaturePad(){
   const c=$('sigCanvas');
   const ratio=window.devicePixelRatio||1;
-  const w=c.clientWidth||520,h=c.clientHeight||44;
+  const w=c.clientWidth||520,h=c.clientHeight||56;
   c.width=Math.round(w*ratio);c.height=Math.round(h*ratio);
   const ctx=c.getContext('2d');ctx.setTransform(1,0,0,1,0,0);ctx.scale(ratio,ratio);
   ctx.lineWidth=1.6;ctx.lineCap='round';ctx.lineJoin='round';ctx.strokeStyle='#0b2a4a';
@@ -804,7 +809,9 @@ function initSignaturePad(){
 function drawSigBaseline(){
   if(!sigCtxCache)return;
   const{ctx,w,h}=sigCtxCache;
-  ctx.save();ctx.strokeStyle='#000';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(2,h-9);ctx.lineTo(w-2,h-9);ctx.stroke();ctx.restore();
+  /* v5.1: the box is 12px deeper than it was and the line sits 8px lower in it,
+     so there is more room to sign without moving the X, the caption or the stamp. */
+  ctx.save();ctx.strokeStyle='#000';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(2,h-13);ctx.lineTo(w-2,h-13);ctx.stroke();ctx.restore();
 }
 function sigPos(e){const r=$('sigCanvas').getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top};}
 function sigStart(e){e.preventDefault();sigDrawing=true;sigMoved=false;const p=sigPos(e);sigCtxCache.ctx.beginPath();sigCtxCache.ctx.moveTo(p.x,p.y);try{$('sigCanvas').setPointerCapture(e.pointerId);}catch(err){}}
@@ -895,7 +902,7 @@ function gather(){
     name:$('svcName').value||'Customer',phone:$('svcPhone').value,email:$('custEmail').value,
     addr:[$('svcAddr').value,$('svcCity').value,$('svcState').value,$('svcZip').value].filter(Boolean).join(', '),
     dispatch:$('fDispatch').value,wo:$('fWO').value,billName:$('billName').value,
-    parts,work:$('svcPerformed').value,fields,checks,...t};
+    parts,work:$('svcPerformed').value,notes:$('invNotes').value,fields,checks,...t};
 }
 /* renders the sheet to a PDF and resolves with {pdf, blob, filename}. Copies the
    live signature canvas bitmap into the html2canvas clone (a cloned canvas node
@@ -947,6 +954,9 @@ function downloadPDF(){
   buildInvoicePdf().then(({blob,filename})=>{saveBlob(blob,filename);toast('PDF saved');})
     .catch(()=>toast('PDF failed, use Print instead'));
 }
+/* v5.1: notes for the office. Never printed on the invoice, always carried with
+   the email and the share as a NOTES block, and only when something was typed. */
+function notesBlock(g){const n=((g&&g.notes)||'').trim();return n?('\n\nNOTES:\n'+n):'';}
 function emailBody(g){
   const lines=g.parts.map(p=>`  - ${p.q||''} ${p.it} ${p.am?('$'+p.am):''}`.replace(/\s+/g,' ').trim()).join('\n');
   const ref=[g.dispatch?('Dispatch '+g.dispatch):'',g.wo?('WO '+g.wo):'',g.billName].filter(Boolean).join(' · ');
@@ -954,7 +964,7 @@ function emailBody(g){
     `Service location: ${g.name}${g.phone?'  '+g.phone:''}\n${g.addr?g.addr+'\n':''}${ref?ref+'\n':''}\n`+
     `PARTS/MATERIAL/EQUIPMENT:\n${lines||'  (none)'}\n\n`+
     `Parts total: $${g.partsTotal?money(g.partsTotal):'0.00'}\nLabor: $${money(g.labor)} (${g.hrs} hr @ $${money(g.rate)})\nSubtotal: $${money(g.sub)}\nAmount now due: $${money(g.total)}\n\n`+
-    `Service performed:\n${g.work||''}\n\nAdvanced Home Services`;
+    `Service performed:\n${g.work||''}\n\nAdvanced Home Services`+notesBlock(g);
 }
 function emailBilling(){const g=gather();const to=settings.billing||'ahsworkorders@gmail.com';
   window.location.href=`mailto:${to}?subject=${encodeURIComponent('Invoice No '+g.no+' ('+g.status+') - '+g.name)}&body=${encodeURIComponent(emailBody(g))}`;}
@@ -1009,7 +1019,8 @@ function doShareOrFallback(blob,filename,g){
     const r=shareRecipients(g);
     try{if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(r.list).catch(function(){});}catch(err){}
     toast('Both addresses copied, paste them into To');
-    navigator.share({files:[file],title:'Advanced Home Services Invoice No '+g.no,text:r.line+'\nInvoice No '+g.no+' for '+g.name})
+    const nb=notesBlock(g);
+    navigator.share({files:[file],title:'Advanced Home Services Invoice No '+g.no,text:r.line+nb+(nb?'\n\n':'\n')+'Invoice No '+g.no+' for '+g.name})
       .then(()=>{recordSent(g);toast('Sent');resetSendButton();})
       .catch(err=>{
         resetSendButton();
@@ -1072,6 +1083,7 @@ function openSent(id){
   $('partRows').innerHTML='';
   (s.parts||[]).forEach(p=>addPart(p.q,p.it,p.am));
   ensureRows(Math.max(11,(s.parts||[]).length));
+  $('invNotes').value=s.notes||'';
   setStatus(s.status||'completed');
   clearSignature();
   resetSendButton();
@@ -1101,6 +1113,7 @@ function reopenPending(id){const p=loadPending().find(x=>x.id===id);if(!p)return
   if(p.fields){FIELD_IDS.forEach(fid=>{if(fid in p.fields)$(fid).value=p.fields[fid];});CHECK_IDS.forEach(cid=>{if(p.checks&&cid in p.checks)$(cid).checked=p.checks[cid];});
     $('partRows').innerHTML='';(p.parts||[]).forEach(x=>addPart(x.q,x.it,x.am));ensureRows(Math.max(11,(p.parts||[]).length));}
   else{$('svcName').value=p.name||'';$('fWO').value=p.wo||'';$('invNo').value=p.no||peekNum();}
+  $('invNotes').value=p.notes||'';
   setStatus('pending');clearSignature();resetSendButton();compute();
   syncFormFromSheet();scrollToEntry();toast('Reopened No '+p.no);}
 function completePending(id){savePending(loadPending().filter(x=>x.id!==id));renderPending();toast('Marked done. Bill it.');}
@@ -1116,6 +1129,7 @@ function saveAndNew(){
   editingPendingId=null;
   ['svcName','svcAddr','svcCity','svcState','svcZip','svcPhone','fDispatch','fWO','fAuth','billName','billAddr','billCity','billState','billZip','billPhone','mfg1','model1','serial1','mfg2','model2','serial2','svcPerformed','laborHrs','laborRate','tPayRecv','tLessInv','custEmail'].forEach(id=>$(id).value='');
   ['cbGood','cbFair','cbPoor','cbReplace','cbCC','cbCheck','cbCash'].forEach(id=>$(id).checked=false);
+  $('invNotes').value='';
   $('pasteBox').value='';$('parseReport').classList.remove('show');
   $('partRows').innerHTML='';ensureRows(11);
   clearSignature();
@@ -1268,9 +1282,9 @@ function finishSignature(){
     sh=Math.min(big.height-sy,(bigSigBox.y1-bigSigBox.y0)*r);
   }
   if(!(sw>1)||!(sh>1)){sx=0;sy=0;sw=big.width;sh=big.height;}
-  const fit=Math.min((cw-6)/sw,(ch-12)/sh);
+  const fit=Math.min((cw-6)/sw,(ch-16)/sh);
   const dw=sw*fit,dh=sh*fit;
-  const dy=Math.max(0,(ch-10)-dh);
+  const dy=Math.max(0,(ch-14)-dh);
   ctx.drawImage(big,sx,sy,sw,sh,3,dy,dw,dh);
   sigHasInk=true;sigMoved=true;
   stampSigned();
@@ -1323,6 +1337,7 @@ window.addEventListener('keydown',e=>{if(e.key==='Escape'){closeSettings();close
 /* any change to a form field marks the cached PDF stale and queues a background rebuild */
 $('sheet').addEventListener('input',markPdfStale);
 $('custEmail').addEventListener('input',markPdfStale);
+$('invNotes').addEventListener('input',markPdfStale);
 $('invNo').value=peekNum();$('invTech').value=settings.tech;setDates();ensureRows(11);setStatus('completed');compute();renderPending();renderSent();initSignaturePad();renderCompanyAddress();
 /* v5: wire the entry form to the sheet, fill it from the sheet, and size the preview */
 bindForm();
