@@ -1,6 +1,6 @@
 <!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Advanced Home Services Invoice</title>
-<!-- v3 (2026-09-16): built for a technician on an iPhone. Adds a finger-drawn signature pad (canvas, copied into the PDF/print via html2canvas onclone), a Send invoice button that shares the PDF through the iOS share sheet when available and falls back to saving the PDF plus a mailto with the summary, a Sent invoices list (signature not saved) above Pending, a rewritten DispatchMe/Frontdoor paste reader that understands the job-page, confirmation-email and work-order-email layouts, and plain-language labels throughout. v2 untouched in the vault original. v4 (2026-09-17, his review): sheet at the very top, header and paste reader retired from view, customer email and a bigger Completed/Pending toggle below the sheet, a blue Mark as pending button left of Send that files the whole form into the Pending list, Pending listed above Sent. v4.1 (2026-09-17, same review): three main buttons, Mark as pending, Send invoice, green Mark completed, which files the invoice under Completed invoices and starts the next; Print, Save PDF and Office copy moved to a smaller second row. v4.2: pending rows show the follow-up date instead of a day count. v5 (2026-09-17, the owner's phone review): a tall one field per line entry form above the sheet, in his order (service location, billing, job, equipment, parts, labor, service performed, general condition, payment, signature, customer email), every field writing straight into the paper sheet which stays canonical; the authorization signature moved to a full screen pop up pad that copies onto the sheet canvas on Done; the paper sheet kept below as a scaled read only Preview at phone width and still captured full size for the PDF; Send now carries the customer and the office address together (mailto to customer with the office on CC, both addresses on the first line of the share text and copied to the clipboard), with Office copy by email untouched; the separate customer email field below the sheet retired into the form. v5.1 (2026-09-17, his next two): notes for the office, typed at the bottom of the entry form, never printed on the invoice but carried into every email and share as a NOTES block and saved with the pending and completed records; and the signature box on the sheet made deeper by twelve pixels with the signing line moved down eight, so there is more room to scribble without moving the X, the caption or the signed stamp. -->
+<!-- v3 (2026-09-16): built for a technician on an iPhone. Adds a finger-drawn signature pad (canvas, copied into the PDF/print via html2canvas onclone), a Send invoice button that shares the PDF through the iOS share sheet when available and falls back to saving the PDF plus a mailto with the summary, a Sent invoices list (signature not saved) above Pending, a rewritten DispatchMe/Frontdoor paste reader that understands the job-page, confirmation-email and work-order-email layouts, and plain-language labels throughout. v2 untouched in the vault original. v4 (2026-09-17, his review): sheet at the very top, header and paste reader retired from view, customer email and a bigger Completed/Pending toggle below the sheet, a blue Mark as pending button left of Send that files the whole form into the Pending list, Pending listed above Sent. v4.1 (2026-09-17, same review): three main buttons, Mark as pending, Send invoice, green Mark completed, which files the invoice under Completed invoices and starts the next; Print, Save PDF and Office copy moved to a smaller second row. v4.2: pending rows show the follow-up date instead of a day count. v5 (2026-09-17, the owner's phone review): a tall one field per line entry form above the sheet, in his order (service location, billing, job, equipment, parts, labor, service performed, general condition, payment, signature, customer email), every field writing straight into the paper sheet which stays canonical; the authorization signature moved to a full screen pop up pad that copies onto the sheet canvas on Done; the paper sheet kept below as a scaled read only Preview at phone width and still captured full size for the PDF; Send now carries the customer and the office address together (mailto to customer with the office on CC, both addresses on the first line of the share text and copied to the clipboard), with Office copy by email untouched; the separate customer email field below the sheet retired into the form. v5.1 (2026-09-17, his next two): notes for the office, typed at the bottom of the entry form, never printed on the invoice but carried into every email and share as a NOTES block and saved with the pending and completed records; and the signature box on the sheet made deeper by twelve pixels with the signing line moved down eight, so there is more room to scribble without moving the X, the caption or the signed stamp. v5.2 (2026-09-17, read back by a second pair of eyes): the sheet goes into the PDF as a JPEG at 0.85 quality instead of a PNG, which is what made a signed invoice 13.8 MB and too big to send from a phone; the company mark now travels inside this file as image data, so the capture is no longer blocked from reading it off the website and the real logo lands on the PDF, with the lettered stand in kept only for an image that fails to load; the big Completed or Pending pill is off the page at his order, its two buttons kept out of sight so the status switch still has its handles, and the status is set by the buttons alone, pending by Mark as pending, completed by Mark completed, left alone by Send; Send invoice is now the full width of the column and twice the weight, with Mark completed and Mark as pending side by side directly under it at every width including a phone, and Print, Save PDF and Office copy by email in the small row below; a pending row reads created with the day the invoice was made, oldest first, in place of the follow-up date and its late wording, with the follow-up date still kept on the record; and from the read back, the capture counts its own depth and lets go on every exit so two builds at once or a capture library that never loaded cannot strand the preview mid capture, background rebuilds no longer leave errors nobody catches, the Business info boxes are 16px so an iPhone stops zooming into them, the pop up clears the iPhone home bar, and Same as service location and a saved technician name both reach the entry form. -->
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="AHS Invoice">
@@ -167,7 +167,6 @@ textarea.paste:focus{border-color:var(--a);outline:none}
 .pending-item .pi-cust{font-weight:700;font-size:14px}
 .pending-item .pi-meta{color:var(--dim);font-size:12.3px;margin-top:2px}
 .pi-due{font-family:var(--mono);font-size:11px;font-weight:700;padding:3px 8px;border:1px solid var(--line2);border-radius:6px;white-space:nowrap;color:var(--dim)}
-.pi-due.now{border-color:var(--a);color:var(--a)}
 .pi-actions{display:flex;gap:7px}
 .pi-btn{background:none;border:1px solid var(--line2);color:var(--dim);border-radius:7px;padding:6px 10px;font-size:12px;cursor:pointer}
 .pi-btn:hover{color:var(--txt);border-color:var(--a)}
@@ -179,8 +178,9 @@ textarea.paste:focus{border-color:var(--a);outline:none}
 .modal p.sub{color:var(--dim);font-size:12.5px;margin-bottom:15px}
 .fld{margin-bottom:11px}
 .fld label{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--dim);margin-bottom:5px}
-.fld input{width:100%;background:var(--card2);border:1px solid var(--line2);color:var(--txt);border-radius:8px;padding:9px 11px;font:inherit}
+.fld input{width:100%;background:var(--card2);border:1px solid var(--line2);color:var(--txt);border-radius:8px;padding:9px 11px;font:16px/1.4 var(--body);-webkit-appearance:none}
 .fld input:focus{border-color:var(--a);outline:none}
+@supports (padding:env(safe-area-inset-bottom)){.modal{padding-bottom:calc(20px + env(safe-area-inset-bottom))}}
 .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(18px);background:var(--card);color:var(--txt);border:1px solid var(--a);padding:11px 17px;border-radius:10px;opacity:0;transition:.24s;pointer-events:none;z-index:60;font-size:14px}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
@@ -239,6 +239,14 @@ textarea.paste:focus{border-color:var(--a);outline:none}
 .sheet-scale-outer{overflow:hidden;position:relative}
 .sheet-scale-inner{transform-origin:top left}
 body.capturing .sheet-scale-inner{transform:none !important;position:absolute;top:0;left:0}
+/* v5.2 at his order: the Completed or Pending pill left the page, Send invoice is
+   the full width of the column and tall, and Mark completed and Mark as pending
+   sit side by side under it at every width, phones included. */
+.actions.main{display:block;margin-top:14px}
+.actions.main .btn.send-big{display:block;width:100%;padding:18px 16px;font:800 18px/1.2 var(--body);border-radius:10px}
+.actions.pair{display:flex;flex-wrap:nowrap;gap:10px;margin-top:10px}
+.actions.pair .btn{flex:1 1 0;min-width:0;padding:14px 8px;font-size:15px;white-space:nowrap}
+@media (max-width:360px){.actions.pair .btn{font-size:13.5px;padding:14px 4px}}
 @media (max-width:900px){
   .sheet-scroll{overflow:hidden;padding:8px}
   #sheet{pointer-events:none}
@@ -263,6 +271,11 @@ body.capturing .sheet-scale-inner{transform:none !important;position:absolute;to
       </div>
     </div>
   <div id="statusHint"></div>
+  <!-- v5.2: the big Completed or Pending pill left the page at his order. The
+       buttons carry the status now: Mark as pending sets pending, Mark completed
+       sets completed, Send leaves it where it stands. These two keep their ids so
+       setStatus still has something to switch. -->
+  <div class="seg big"><button id="segCompleted" class="on" onclick="setStatus('completed')">Completed</button><button id="segPending" onclick="setStatus('pending')">Pending</button></div>
 </div>
 
 <!-- v5 ENTRY FORM: what the technician types on the phone. Every field writes
@@ -387,7 +400,7 @@ body.capturing .sheet-scale-inner{transform:none !important;position:absolute;to
   <!-- HEADER -->
   <div class="s-head">
     <div class="s-brand">
-      <img class="ahs-logo" src="https://www.ahslv.com/images/resources/logo.png" alt="Advanced Home Services" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+      <img class="ahs-logo" src="data:image/png;base64,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" alt="Advanced Home Services" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
       <div class="wm-lockup" style="display:none">
         <svg viewBox="0 0 24 24" fill="none" stroke="#0b2440" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/><path d="M10 20v-5h4v5"/><path d="M8.5 13.5l1.5 1.5"/></svg>
         <div class="wm">ADVANCED<br>HOME SERVICES<small>AIR CONDITIONING · HEATING · PLUMBING</small></div>
@@ -516,11 +529,12 @@ body.capturing .sheet-scale-inner{transform:none !important;position:absolute;to
 </div>
 
 <div class="wrap chrome">
-  <div class="seg big"><button id="segCompleted" class="on" onclick="setStatus('completed')">Completed</button><button id="segPending" onclick="setStatus('pending')">Pending</button></div>
   <div class="actions main">
-    <button class="btn primary" id="pendBtn" onclick="markPending()">Mark as pending</button>
-    <button class="btn cta" id="sendBtn" onclick="sendInvoice()">Send invoice</button>
+    <button class="btn cta send-big" id="sendBtn" onclick="sendInvoice()">Send invoice</button>
+  </div>
+  <div class="actions pair">
     <button class="btn done" id="doneBtn" onclick="markCompleted()">Mark completed</button>
+    <button class="btn primary" id="pendBtn" onclick="markPending()">Mark as pending</button>
   </div>
   <div class="actions secondary">
     <button class="btn ghost" onclick="window.print()">Print</button>
@@ -530,7 +544,7 @@ body.capturing .sheet-scale-inner{transform:none !important;position:absolute;to
 
   <div class="card" style="margin-top:18px">
     <h2>Pending invoices <span id="pendCount" style="color:var(--faint)"></span></h2>
-    <p class="sub">Held calls with a follow-up date so nothing slips. Open one to finish and bill it.</p>
+    <p class="sub">Held calls, oldest first, so nothing slips. Open one to finish and bill it.</p>
     <div id="pendingList"><div class="pending-empty">No pending invoices yet.</div></div>
   </div>
 
@@ -760,7 +774,10 @@ function fillFromPaste(){
 function copyServiceToBilling(){
   $('billName').value=$('svcName').value;$('billAddr').value=$('svcAddr').value;$('billCity').value=$('svcCity').value;
   $('billState').value=$('svcState').value;$('billZip').value=$('svcZip').value;$('billPhone').value=$('svcPhone').value;
-  invalidatePdfCache();
+  invalidatePdfCache();markPdfStale();
+  /* the link on the sheet itself reaches this too, so the entry form above is
+     filled in from here rather than from each caller */
+  if(typeof syncFormFromSheet==='function')syncFormFromSheet();
   toast('Billing set to service location');
 }
 
@@ -816,7 +833,7 @@ function drawSigBaseline(){
 function sigPos(e){const r=$('sigCanvas').getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top};}
 function sigStart(e){e.preventDefault();sigDrawing=true;sigMoved=false;const p=sigPos(e);sigCtxCache.ctx.beginPath();sigCtxCache.ctx.moveTo(p.x,p.y);try{$('sigCanvas').setPointerCapture(e.pointerId);}catch(err){}}
 function sigMove(e){if(!sigDrawing)return;e.preventDefault();const p=sigPos(e);sigCtxCache.ctx.lineTo(p.x,p.y);sigCtxCache.ctx.stroke();sigMoved=true;sigHasInk=true;}
-function sigEnd(e){if(!sigDrawing)return;sigDrawing=false;if(sigMoved){stampSigned();pdfCacheStale=true;clearTimeout(sendDebounceTimer);refreshPdfCache();}}
+function sigEnd(e){if(!sigDrawing)return;sigDrawing=false;if(sigMoved){stampSigned();pdfCacheStale=true;clearTimeout(sendDebounceTimer);queuePdfRebuild();}}
 function stampSigned(){
   const d=new Date();
   $('sigStamp').textContent='Signed '+d.toLocaleDateString('en-US',{month:'2-digit',day:'2-digit',year:'numeric'})+' '+d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
@@ -844,7 +861,7 @@ function saveSettings(){
   settings={tech:setTech.value.trim(),companyAddress:setCompanyAddr.value.trim(),billing:setBilling.value.trim()||'ahsworkorders@gmail.com',warranty:setWarranty.value.trim()||'American Home Shield',nextNum:parseInt(setNextNum.value)||154782,remind:parseInt(setRemind.value)||2};
   store.set('ahs_form_settings',settings);closeSettings();
   if(!$('invTech').value)$('invTech').value=settings.tech;
-  $('invNo').value=peekNum();renderCompanyAddress();markPdfStale();toast('Saved');
+  $('invNo').value=peekNum();renderCompanyAddress();syncFormFromSheet();markPdfStale();toast('Saved');
 }
 
 /* ============ voice (optional) ============ */
@@ -907,21 +924,35 @@ function gather(){
 /* renders the sheet to a PDF and resolves with {pdf, blob, filename}. Copies the
    live signature canvas bitmap into the html2canvas clone (a cloned canvas node
    is otherwise blank) so the drawn signature shows up in the PDF. */
+/* v5.2: the preview is scaled down with a CSS transform at phone width, so the
+   transform comes off for the length of the capture and goes straight back on
+   afterwards. The depth count keeps a background rebuild and a tapped Save PDF
+   from clearing each other's, and every way out of the build, including a throw
+   before html2canvas ever hands back a promise, puts the page back as it was. */
+let captureDepth=0;
+function beginCapture(){captureDepth++;document.body.classList.add('capturing');}
+function endCapture(){if(captureDepth>0)captureDepth--;if(!captureDepth)document.body.classList.remove('capturing');}
+/* v5.2: the page went out at 13.8 MB because the sheet went into the PDF as a
+   PNG. The same capture as a JPEG at 0.85 on the white background is a fraction
+   of that and reads the same on paper. Print does not use this path. */
+const PDF_SCALE=2,PDF_JPEG_QUALITY=0.85;
 function buildInvoicePdf(){
   const g=gather();const sheet=$('sheet');
-  /* the preview below is scaled down with a CSS transform at phone width, and
-     html2canvas measures the live element, so the transform comes off for the
-     length of the capture and goes straight back on afterwards. */
-  document.body.classList.add('capturing');
-  return html2canvas(sheet,{scale:2,backgroundColor:'#ffffff',useCORS:true,windowWidth:sheet.scrollWidth,onclone:function(d){
+  beginCapture();
+  let released=false;
+  const release=function(){if(!released){released=true;endCapture();}};
+  let shot;
+  try{
+    shot=html2canvas(sheet,{scale:PDF_SCALE,backgroundColor:'#ffffff',useCORS:true,windowWidth:sheet.scrollWidth,onclone:function(d){
     d.querySelectorAll('.tool-only').forEach(function(e){e.style.display='none';});
     /* the clone renders the sheet at full size, in normal flow, unclipped */
     d.body.classList.remove('capturing');
     var ci=d.getElementById('sheetScaleInner');if(ci){ci.style.transform='none';ci.style.position='static';}
     var co=d.getElementById('sheetScaleOuter');if(co){co.style.height='auto';co.style.overflow='visible';}
     var csc=d.getElementById('sheetScroll');if(csc){csc.style.overflow='visible';}
-    var lg=d.querySelector('.ahs-logo');if(lg)lg.style.display='none';
-    var fb=d.querySelector('.wm-lockup');if(fb)fb.style.display='flex';
+    /* v5.2: the logo is carried inside this file now, so the clone draws the real
+       mark. Nothing is hidden here any more; the lettered stand in only appears
+       when the image itself fails to load, through the img's own onerror. */
     var cc=d.getElementById('sigCanvas'),live=$('sigCanvas');
     if(cc&&live){
       var dataUrl=live.toDataURL('image/png');
@@ -933,16 +964,19 @@ function buildInvoicePdf(){
         img.src=dataUrl;
       });
     }
-  }}).then(canvas=>{
-    document.body.classList.remove('capturing');
+  }});
+  }catch(err){release();return Promise.reject(err);}
+  if(!shot||typeof shot.then!=='function'){release();return Promise.reject(new Error('The capture library did not load'));}
+  return shot.then(canvas=>{
+    release();
     const{jsPDF}=window.jspdf;const pdf=new jsPDF({orientation:'landscape',unit:'pt',format:'letter'});
     const pw=pdf.internal.pageSize.getWidth(),ph=pdf.internal.pageSize.getHeight(),m=18;
     let w=pw-2*m,h=w*canvas.height/canvas.width;
     if(h>ph-2*m){h=ph-2*m;w=h*canvas.width/canvas.height;}
-    pdf.addImage(canvas.toDataURL('image/png'),'PNG',(pw-w)/2,m,w,h);
+    pdf.addImage(canvas.toDataURL('image/jpeg',PDF_JPEG_QUALITY),'JPEG',(pw-w)/2,m,w,h);
     const filename='AHS-Invoice-'+(g.no||'draft')+'-'+g.name.replace(/[^\w]+/g,'_')+'.pdf';
     return{pdf,blob:pdf.output('blob'),filename,g};
-  }).catch(err=>{document.body.classList.remove('capturing');throw err;});
+  }).catch(err=>{release();throw err;});
 }
 function saveBlob(blob,filename){
   const url=URL.createObjectURL(blob);
@@ -979,7 +1013,11 @@ function emailBilling(){const g=gather();const to=settings.billing||'ahsworkorde
    builds one and asks for a second tap, which then shares synchronously. */
 let pdfCache=null,pdfCacheStale=true,pdfBuildInFlight=false,pdfBuildPending=false,pdfBuildPromise=null,sendDebounceTimer=null;
 function invalidatePdfCache(){pdfCache=null;pdfCacheStale=true;clearTimeout(sendDebounceTimer);}
-function markPdfStale(){pdfCacheStale=true;clearTimeout(sendDebounceTimer);sendDebounceTimer=setTimeout(refreshPdfCache,1500);}
+function markPdfStale(){pdfCacheStale=true;clearTimeout(sendDebounceTimer);sendDebounceTimer=setTimeout(queuePdfRebuild,1500);}
+/* v5.2: the background rebuilds are fire and forget, and refreshPdfCache rethrows
+   so that a tap on Send can hear about a failure. Swallow it here instead of
+   leaving an unhandled rejection every time a rebuild fails. */
+function queuePdfRebuild(){try{const pr=refreshPdfCache();if(pr&&pr.catch)pr.catch(function(){});}catch(err){}}
 function refreshPdfCache(){
   if(pdfBuildInFlight){pdfBuildPending=true;return pdfBuildPromise;}
   pdfBuildInFlight=true;
@@ -1097,18 +1135,30 @@ function openSent(id){
 /* ============ pending queue ============ */
 function loadPending(){return store.get('ahs_form_pending',[]);}
 function savePending(a){store.set('ahs_form_pending',a);}
+/* v5.2 at his order: the row says the day the invoice was made, not a follow-up
+   date. Records written before this carry no made-on day, so it is read off the
+   timestamp inside their own id, and failing that from the follow-up date less
+   the follow-up days. The follow-up date itself is still kept on the record. */
+function pendingCreated(p){
+  if(p&&p.createdAt)return p.createdAt;
+  const m=/^p(\d+)$/.exec((p&&p.id)||'');
+  if(m)return parseInt(m[1],10);
+  if(p&&p.remindAt)return p.remindAt-(settings.remind||2)*86400000;
+  return Date.now();
+}
 function renderPending(){
   const list=loadPending(),el=$('pendingList');$('pendCount').textContent=list.length?('· '+list.length):'';
   if(!list.length){el.innerHTML='<div class="pending-empty">No pending invoices yet.</div>';return;}
-  const now=Date.now();
-  el.innerHTML=list.sort((a,b)=>a.remindAt-b.remindAt).map(p=>{
-    const days=Math.ceil((p.remindAt-now)/86400000);const dueStr=new Date(p.remindAt).toLocaleDateString('en-US',{weekday:'short',month:'numeric',day:'numeric'});let cls='',txt='follow up '+dueStr;
-    if(days<=0){cls='now';txt='follow up today'+(days<0?', '+(-days)+'d late':'');}else if(days<=1){cls='now';txt='follow up tomorrow, '+dueStr;}
-    return `<div class="pending-item"><div class="pi-main"><div class="pi-cust">${escapeHtml(p.name)}</div><div class="pi-meta">No ${escapeHtml(p.no)} · $${money(p.total)}${p.wo?' · WO '+escapeHtml(p.wo):''}${p.addr?' · '+escapeHtml(p.addr):''}</div></div><div class="pi-due ${cls}">${txt}</div><div class="pi-actions"><button class="pi-btn" onclick="reopenPending('${p.id}')">Open</button><button class="pi-btn" onclick="completePending('${p.id}')">Done</button><button class="pi-btn" onclick="removePending('${p.id}')">Remove</button></div></div>`;}).join('');
+  el.innerHTML=list.slice().sort((a,b)=>pendingCreated(a)-pendingCreated(b)).map(p=>{
+    const txt='created '+new Date(pendingCreated(p)).toLocaleDateString('en-US',{weekday:'short',month:'numeric',day:'numeric'});
+    return `<div class="pending-item"><div class="pi-main"><div class="pi-cust">${escapeHtml(p.name)}</div><div class="pi-meta">No ${escapeHtml(p.no)} · $${money(p.total)}${p.wo?' · WO '+escapeHtml(p.wo):''}${p.addr?' · '+escapeHtml(p.addr):''}</div></div><div class="pi-due">${txt}</div><div class="pi-actions"><button class="pi-btn" onclick="reopenPending('${p.id}')">Open</button><button class="pi-btn" onclick="completePending('${p.id}')">Done</button><button class="pi-btn" onclick="removePending('${p.id}')">Remove</button></div></div>`;}).join('');
 }
 function upsertPending(g){const list=loadPending(),id=editingPendingId||('p'+Date.now());
-  const rec=Object.assign({},g,{id,remindAt:Date.now()+(settings.remind||2)*86400000});
-  const i=list.findIndex(x=>x.id===id);if(i>=0)list[i]=rec;else list.push(rec);savePending(list);renderPending();}
+  const i=list.findIndex(x=>x.id===id);
+  /* a reopened invoice keeps the day it was first made */
+  const created=i>=0?pendingCreated(list[i]):Date.now();
+  const rec=Object.assign({},g,{id,createdAt:created,remindAt:Date.now()+(settings.remind||2)*86400000});
+  if(i>=0)list[i]=rec;else list.push(rec);savePending(list);renderPending();}
 function reopenPending(id){const p=loadPending().find(x=>x.id===id);if(!p)return;editingPendingId=id;invalidatePdfCache();
   if(p.fields){FIELD_IDS.forEach(fid=>{if(fid in p.fields)$(fid).value=p.fields[fid];});CHECK_IDS.forEach(cid=>{if(p.checks&&cid in p.checks)$(cid).checked=p.checks[cid];});
     $('partRows').innerHTML='';(p.parts||[]).forEach(x=>addPart(x.q,x.it,x.am));ensureRows(Math.max(11,(p.parts||[]).length));}
@@ -1288,7 +1338,7 @@ function finishSignature(){
   ctx.drawImage(big,sx,sy,sw,sh,3,dy,dw,dh);
   sigHasInk=true;sigMoved=true;
   stampSigned();
-  pdfCacheStale=true;clearTimeout(sendDebounceTimer);refreshPdfCache();
+  pdfCacheStale=true;clearTimeout(sendDebounceTimer);queuePdfRebuild();
   closeSigModal();updateSigButton();
   toast('Signature captured');
 }
