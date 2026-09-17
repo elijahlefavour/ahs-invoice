@@ -1,6 +1,6 @@
 <!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Advanced Home Services Invoice</title>
-<!-- v3 (2026-09-16): built for a technician on an iPhone. Adds a finger-drawn signature pad (canvas, copied into the PDF/print via html2canvas onclone), a Send invoice button that shares the PDF through the iOS share sheet when available and falls back to saving the PDF plus a mailto with the summary, a Sent invoices list (signature not saved) above Pending, a rewritten DispatchMe/Frontdoor paste reader that understands the job-page, confirmation-email and work-order-email layouts, and plain-language labels throughout. v2 untouched in the vault original. v4 (2026-09-17, his review): sheet at the very top, header and paste reader retired from view, customer email and a bigger Completed/Pending toggle below the sheet, a blue Mark as pending button left of Send that files the whole form into the Pending list, Pending listed above Sent. v4.1 (2026-09-17, same review): three main buttons, Mark as pending, Send invoice, green Mark completed, which files the invoice under Completed invoices and starts the next; Print, Save PDF and Office copy moved to a smaller second row. v4.2: pending rows show the follow-up date instead of a day count. -->
+<!-- v3 (2026-09-16): built for a technician on an iPhone. Adds a finger-drawn signature pad (canvas, copied into the PDF/print via html2canvas onclone), a Send invoice button that shares the PDF through the iOS share sheet when available and falls back to saving the PDF plus a mailto with the summary, a Sent invoices list (signature not saved) above Pending, a rewritten DispatchMe/Frontdoor paste reader that understands the job-page, confirmation-email and work-order-email layouts, and plain-language labels throughout. v2 untouched in the vault original. v4 (2026-09-17, his review): sheet at the very top, header and paste reader retired from view, customer email and a bigger Completed/Pending toggle below the sheet, a blue Mark as pending button left of Send that files the whole form into the Pending list, Pending listed above Sent. v4.1 (2026-09-17, same review): three main buttons, Mark as pending, Send invoice, green Mark completed, which files the invoice under Completed invoices and starts the next; Print, Save PDF and Office copy moved to a smaller second row. v4.2: pending rows show the follow-up date instead of a day count. v5 (2026-09-17, the owner's phone review): a tall one field per line entry form above the sheet, in his order (service location, billing, job, equipment, parts, labor, service performed, general condition, payment, signature, customer email), every field writing straight into the paper sheet which stays canonical; the authorization signature moved to a full screen pop up pad that copies onto the sheet canvas on Done; the paper sheet kept below as a scaled read only Preview at phone width and still captured full size for the PDF; Send now carries the customer and the office address together (mailto to customer with the office on CC, both addresses on the first line of the share text and copied to the clipboard), with Office copy by email untouched; the separate customer email field below the sheet retired into the form. -->
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="AHS Invoice">
@@ -203,6 +203,50 @@ textarea.paste:focus{border-color:var(--a);outline:none}
 .actions.secondary{margin-top:10px}
 .actions.secondary .btn{padding:9px 13px;font-size:13px}
 .btn.cta:hover{filter:brightness(1.04)}
+
+/* ---------- v5: the phone entry form, the signature pop up, the scaled preview ---------- */
+.entry{max-width:660px}
+.sec-h{font-family:var(--disp);font-weight:700;text-transform:uppercase;letter-spacing:.02em;font-size:17px;color:var(--txt);margin:20px 0 2px}
+.sec-sub{color:var(--dim);font-size:12.5px;margin-bottom:10px}
+.fcard{background:var(--card);border:1px solid var(--line);border-radius:11px;padding:14px 15px;margin-bottom:12px}
+.fcard h3{font-family:var(--body);font-size:14.5px;font-weight:700;color:var(--a);margin-bottom:11px}
+.f-row{margin-bottom:11px}
+.f-row:last-child{margin-bottom:0}
+.f-row label{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--dim);margin-bottom:5px}
+.f-row input,.f-row textarea{width:100%;background:#fff;border:1px solid var(--line2);color:var(--txt);border-radius:9px;padding:12px;font:16px/1.4 var(--body);-webkit-appearance:none}
+.f-row input:focus,.f-row textarea:focus{border-color:var(--a);outline:none}
+.f-row textarea{min-height:130px;resize:vertical}
+.f-read{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.f-read>div{flex:1 1 130px}
+.f-read .k{font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--dim);margin-bottom:5px}
+.f-read .v{font-size:16px;font-weight:700;color:var(--txt);background:var(--card2);border:1px solid var(--line2);border-radius:9px;padding:12px;min-height:45px}
+.f-checks{display:flex;flex-wrap:wrap;gap:9px}
+.f-checks label{display:flex;align-items:center;gap:8px;font-size:15px;background:#fff;border:1px solid var(--line2);border-radius:9px;padding:11px 13px;cursor:pointer}
+.f-checks input{width:20px;height:20px;accent-color:var(--a);margin:0}
+.fp-head{display:flex;gap:8px;font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--dim);margin-bottom:6px}
+.fp-head .hq{width:64px}.fp-head .hi{flex:1}.fp-head .ha{width:100px}
+.fp-row{display:flex;gap:8px;margin-bottom:8px}
+.fp-row input{background:#fff;border:1px solid var(--line2);color:var(--txt);border-radius:9px;padding:11px 9px;font:16px/1.4 var(--body);-webkit-appearance:none;min-width:0}
+.fp-row input:focus{border-color:var(--a);outline:none}
+.fp-row .fp-qty{width:64px;text-align:center}
+.fp-row .fp-item{flex:1}
+.fp-row .fp-amt{width:100px;text-align:right}
+.f-inline{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+#sigBtn{width:100%;padding:15px;font-size:16px}
+.sig-note{color:var(--dim);font-size:12.5px;margin-top:9px}
+.modal.full .box{max-width:720px}
+.sig-big{width:100%;height:230px;display:block;touch-action:none;background:#fff;border:1px solid var(--line2);border-radius:10px;background-image:linear-gradient(#9aa5b1,#9aa5b1);background-size:calc(100% - 44px) 1px;background-repeat:no-repeat;background-position:22px calc(100% - 44px);margin-bottom:14px}
+.sheet-scale-outer{overflow:hidden;position:relative}
+.sheet-scale-inner{transform-origin:top left}
+body.capturing .sheet-scale-inner{transform:none !important;position:absolute;top:0;left:0}
+@media (max-width:900px){
+  .sheet-scroll{overflow:hidden;padding:8px}
+  #sheet{pointer-events:none}
+}
+@media print{
+  .sheet-scale-inner{transform:none !important}
+  .sheet-scale-outer{height:auto !important;overflow:visible !important}
+}
 </style></head><body>
 
 <!-- retired from view at Elijah's order 2026-09-17: the paste reader and dictation stay in the file, hidden, so nothing breaks -->
@@ -221,8 +265,118 @@ textarea.paste:focus{border-color:var(--a);outline:none}
   <div id="statusHint"></div>
 </div>
 
+<!-- v5 ENTRY FORM: what the technician types on the phone. Every field writes
+     straight into the paper sheet below, which stays the one source of truth. -->
+<div class="wrap chrome entry" id="entryForm">
+  <h2 class="sec-h">Invoice</h2>
+  <p class="sec-sub">Fill this in top to bottom. The printed invoice below fills itself in as you type.</p>
+
+  <div class="fcard">
+    <div class="f-read">
+      <div><div class="k">Invoice number</div><div class="v" id="f_invNoView"></div></div>
+      <div><div class="k">Date</div><div class="v" id="f_invDateView"></div></div>
+    </div>
+    <div class="f-row"><label>Technician</label><input id="f_invTech" autocomplete="off"></div>
+  </div>
+
+  <div class="fcard">
+    <h3>Service location</h3>
+    <div class="f-row"><label>Name</label><input id="f_svcName" autocomplete="off"></div>
+    <div class="f-row"><label>Address</label><input id="f_svcAddr" autocomplete="off"></div>
+    <div class="f-row"><label>City</label><input id="f_svcCity" autocomplete="off"></div>
+    <div class="f-row"><label>State</label><input id="f_svcState" autocomplete="off"></div>
+    <div class="f-row"><label>Zip</label><input id="f_svcZip" inputmode="numeric" autocomplete="off"></div>
+    <div class="f-row"><label>Phone</label><input id="f_svcPhone" type="tel" autocomplete="off"></div>
+  </div>
+
+  <div class="fcard">
+    <h3>Billing</h3>
+    <div class="f-row"><label>Name</label><input id="f_billName" autocomplete="off"></div>
+    <div class="f-row"><label>Address</label><input id="f_billAddr" autocomplete="off"></div>
+    <div class="f-row"><label>City</label><input id="f_billCity" autocomplete="off"></div>
+    <div class="f-row"><label>State</label><input id="f_billState" autocomplete="off"></div>
+    <div class="f-row"><label>Zip</label><input id="f_billZip" inputmode="numeric" autocomplete="off"></div>
+    <div class="f-row"><label>Phone</label><input id="f_billPhone" type="tel" autocomplete="off"></div>
+    <div class="f-inline" style="margin-top:10px"><button class="linkbtn" onclick="copyServiceToBilling();syncFormFromSheet();">Same as service location</button></div>
+  </div>
+
+  <div class="fcard">
+    <h3>Job</h3>
+    <div class="f-row"><label>Dispatch number</label><input id="f_fDispatch" autocomplete="off"></div>
+    <div class="f-row"><label>Work order number</label><input id="f_fWO" autocomplete="off"></div>
+    <div class="f-row"><label>Authorization number</label><input id="f_fAuth" autocomplete="off"></div>
+  </div>
+
+  <div class="fcard">
+    <h3>Equipment</h3>
+    <div class="f-row"><label>Manufacturer (unit 1)</label><input id="f_mfg1" autocomplete="off"></div>
+    <div class="f-row"><label>Model (unit 1)</label><input id="f_model1" autocomplete="off"></div>
+    <div class="f-row"><label>Serial number (unit 1)</label><input id="f_serial1" autocomplete="off"></div>
+    <div class="f-row"><label>Manufacturer (unit 2)</label><input id="f_mfg2" autocomplete="off"></div>
+    <div class="f-row"><label>Model (unit 2)</label><input id="f_model2" autocomplete="off"></div>
+    <div class="f-row"><label>Serial number (unit 2)</label><input id="f_serial2" autocomplete="off"></div>
+  </div>
+
+  <div class="fcard">
+    <h3>Parts, material, equipment</h3>
+    <div class="fp-head"><div class="hq">Qty</div><div class="hi">Item</div><div class="ha">Amount</div></div>
+    <div id="f_parts"></div>
+    <div class="f-inline" style="margin-top:4px"><button class="btn ghost" onclick="addFormPart()">Add line</button></div>
+  </div>
+
+  <div class="fcard">
+    <h3>Labor</h3>
+    <div class="f-row"><label>Hours</label><input id="f_laborHrs" inputmode="decimal" autocomplete="off"></div>
+    <div class="f-row"><label>Rate per hour</label><input id="f_laborRate" inputmode="decimal" autocomplete="off"></div>
+  </div>
+
+  <div class="fcard">
+    <h3>Service performed and recommendations</h3>
+    <div class="f-row"><textarea id="f_svcPerformed" placeholder="What you found, what you did, what you recommend"></textarea></div>
+  </div>
+
+  <div class="fcard">
+    <h3>General condition</h3>
+    <div class="f-checks">
+      <label><input type="checkbox" id="f_cbGood">Good</label>
+      <label><input type="checkbox" id="f_cbFair">Fair</label>
+      <label><input type="checkbox" id="f_cbPoor">Poor</label>
+      <label><input type="checkbox" id="f_cbReplace">Should replace</label>
+    </div>
+  </div>
+
+  <div class="fcard">
+    <h3>Payment</h3>
+    <div class="f-checks" style="margin-bottom:13px">
+      <label><input type="checkbox" id="f_cbCC">Credit card</label>
+      <label><input type="checkbox" id="f_cbCheck">Check</label>
+      <label><input type="checkbox" id="f_cbCash">Cash</label>
+    </div>
+    <div class="f-row"><label>Payment received</label><input id="f_tPayRecv" inputmode="decimal" autocomplete="off"></div>
+    <div class="f-row"><label>Less invoice</label><input id="f_tLessInv" inputmode="decimal" autocomplete="off"></div>
+  </div>
+
+  <div class="fcard">
+    <h3>Customer signature</h3>
+    <button class="btn primary" id="sigBtn" onclick="openSigModal()">Customer signature</button>
+    <div class="f-inline" style="margin-top:10px"><button class="linkbtn" id="sigBtnState" onclick="resignSignature()" style="display:none">Clear and sign again</button></div>
+    <p class="sig-note">Opens a big signing box for the customer, then drops the signature onto the invoice.</p>
+  </div>
+
+  <div class="fcard">
+    <h3>Customer email</h3>
+    <div class="f-row"><label>Customer email (for sending)</label><input id="custEmail" type="email" inputmode="email" autocomplete="off" placeholder="customer@example.com"></div>
+  </div>
+</div>
+
+<div class="wrap chrome">
+  <h2 class="sec-h">Preview</h2>
+  <p class="sec-sub">The invoice exactly as it prints and sends. Read it here, type it above.</p>
+</div>
+
 <!-- 3 THE FORM -->
-<div class="sheet-scroll chrome-scroll">
+<div class="sheet-scroll chrome-scroll" id="sheetScroll">
+<div class="sheet-scale-outer" id="sheetScaleOuter"><div class="sheet-scale-inner" id="sheetScaleInner">
 <div class="sheet" id="sheet">
 
   <!-- HEADER -->
@@ -353,10 +507,10 @@ textarea.paste:focus{border-color:var(--a);outline:none}
   </div>
 
 </div>
+</div></div>
 </div>
 
 <div class="wrap chrome">
-  <div class="fld" style="max-width:340px;margin-top:4px"><label>Customer email (for sending)</label><input id="custEmail" placeholder="customer@example.com"></div>
   <div class="seg big"><button id="segCompleted" class="on" onclick="setStatus('completed')">Completed</button><button id="segPending" onclick="setStatus('pending')">Pending</button></div>
   <div class="actions main">
     <button class="btn primary" id="pendBtn" onclick="markPending()">Mark as pending</button>
@@ -398,6 +552,18 @@ textarea.paste:focus{border-color:var(--a);outline:none}
     <button class="btn ghost" onclick="closeSettings()">Cancel</button>
     <button class="btn primary" onclick="saveSettings()">Save</button>
   </div>
+</div></div>
+
+<!-- v5 signature pop up: a big pad the customer signs, copied onto the sheet canvas on Done -->
+<div class="modal full" id="sigModal"><div class="box">
+  <h2>Customer signature</h2>
+  <p class="sub">Hand the phone over. Sign in the box, then tap Done.</p>
+  <canvas id="sigBigCanvas" class="sig-big"></canvas>
+  <div class="row-actions" style="justify-content:space-between">
+    <button class="btn ghost" onclick="clearBigSignature()">Clear</button>
+    <button class="btn primary" onclick="finishSignature()">Done</button>
+  </div>
+  <div style="margin-top:12px;text-align:center"><button class="linkbtn" onclick="closeSigModal()">Cancel</button></div>
 </div></div>
 
 <div class="toast" id="toast"></div>
@@ -581,8 +747,9 @@ function fillFromPaste(){
   const rows=[['Name',p.name],['Street',p.street],['City',p.city],['State',p.state],['Zip',p.zip],['Phone',p.phone],['Email',p.email],['Dispatch number',p.dispatch],['Work order',p.wo],['Item',p.item],['Problem',p.problem],['Money note',p.moneyNote],['Warranty (to billing)',p.warranty||settings.warranty]];
   $('parseReport').innerHTML='<b>Filled onto the form:</b><br>'+rows.map(([k,v])=>v?`<span class="hit">${k}: ${escapeHtml(v)}</span>`:`<span class="miss">${k}: not found, write it on the form</span>`).join('<br>')+'<br><span style="color:var(--faint)">Check each field, then add parts and the work performed.</span>';
   $('parseReport').classList.add('show');
-  $('sheet').scrollIntoView({behavior:'smooth',block:'start'});
   invalidatePdfCache();
+  syncFormFromSheet();
+  scrollToEntry();
   toast('Job filled in');
 }
 function copyServiceToBilling(){
@@ -653,6 +820,7 @@ function clearSignature(){
   sigCtxCache.ctx.clearRect(0,0,sigCtxCache.w,sigCtxCache.h);
   drawSigBaseline();
   sigHasInk=false;sigSignedAt=null;$('sigStamp').textContent='';
+  updateSigButton();
   markPdfStale();
 }
 
@@ -734,8 +902,17 @@ function gather(){
    is otherwise blank) so the drawn signature shows up in the PDF. */
 function buildInvoicePdf(){
   const g=gather();const sheet=$('sheet');
+  /* the preview below is scaled down with a CSS transform at phone width, and
+     html2canvas measures the live element, so the transform comes off for the
+     length of the capture and goes straight back on afterwards. */
+  document.body.classList.add('capturing');
   return html2canvas(sheet,{scale:2,backgroundColor:'#ffffff',useCORS:true,windowWidth:sheet.scrollWidth,onclone:function(d){
     d.querySelectorAll('.tool-only').forEach(function(e){e.style.display='none';});
+    /* the clone renders the sheet at full size, in normal flow, unclipped */
+    d.body.classList.remove('capturing');
+    var ci=d.getElementById('sheetScaleInner');if(ci){ci.style.transform='none';ci.style.position='static';}
+    var co=d.getElementById('sheetScaleOuter');if(co){co.style.height='auto';co.style.overflow='visible';}
+    var csc=d.getElementById('sheetScroll');if(csc){csc.style.overflow='visible';}
     var lg=d.querySelector('.ahs-logo');if(lg)lg.style.display='none';
     var fb=d.querySelector('.wm-lockup');if(fb)fb.style.display='flex';
     var cc=d.getElementById('sigCanvas'),live=$('sigCanvas');
@@ -750,6 +927,7 @@ function buildInvoicePdf(){
       });
     }
   }}).then(canvas=>{
+    document.body.classList.remove('capturing');
     const{jsPDF}=window.jspdf;const pdf=new jsPDF({orientation:'landscape',unit:'pt',format:'letter'});
     const pw=pdf.internal.pageSize.getWidth(),ph=pdf.internal.pageSize.getHeight(),m=18;
     let w=pw-2*m,h=w*canvas.height/canvas.width;
@@ -757,7 +935,7 @@ function buildInvoicePdf(){
     pdf.addImage(canvas.toDataURL('image/png'),'PNG',(pw-w)/2,m,w,h);
     const filename='AHS-Invoice-'+(g.no||'draft')+'-'+g.name.replace(/[^\w]+/g,'_')+'.pdf';
     return{pdf,blob:pdf.output('blob'),filename,g};
-  });
+  }).catch(err=>{document.body.classList.remove('capturing');throw err;});
 }
 function saveBlob(blob,filename){
   const url=URL.createObjectURL(blob);
@@ -826,7 +1004,12 @@ function doShareOrFallback(blob,filename,g){
   let file=null;
   try{file=new File([blob],filename,{type:'application/pdf'});}catch(err){}
   if(file && navigator.canShare && navigator.canShare({files:[file]})){
-    navigator.share({files:[file],title:'Advanced Home Services Invoice No '+g.no,text:'Invoice No '+g.no+' for '+g.name})
+    /* the iOS share sheet takes no recipients, so the customer and the office
+       ride along in the text and on the clipboard for a one tap paste. */
+    const r=shareRecipients(g);
+    try{if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(r.list).catch(function(){});}catch(err){}
+    toast('Both addresses copied, paste them into To');
+    navigator.share({files:[file],title:'Advanced Home Services Invoice No '+g.no,text:r.line+'\nInvoice No '+g.no+' for '+g.name})
       .then(()=>{recordSent(g);toast('Sent');resetSendButton();})
       .catch(err=>{
         resetSendButton();
@@ -837,11 +1020,25 @@ function doShareOrFallback(blob,filename,g){
     fallbackSend(g,blob,filename);
   }
 }
+/* who the invoice goes to: the customer, with the office address from Business
+   info always carried along so there is an office copy of every send. */
+function shareRecipients(g){
+  const office=(settings.billing||'ahsworkorders@gmail.com').trim();
+  const cust=(g.email||'').trim();
+  const to=cust||office;
+  const cc=(cust&&office&&office.toLowerCase()!==cust.toLowerCase())?office:'';
+  return{cust:cust,office:office,to:to,cc:cc,
+    line:cc?('To: '+to+', CC: '+cc):('To: '+to),
+    list:cc?(to+', '+cc):to};
+}
 function fallbackSend(g,blob,filename){
   saveBlob(blob,filename);
-  const em=g.email||'';
+  const r=shareRecipients(g);
   const body=emailBody(g)+'\n\nAttach the PDF that just downloaded ('+filename+') before sending.';
-  window.location.href=`mailto:${em}?subject=${encodeURIComponent('Advanced Home Services Invoice No '+g.no)}&body=${encodeURIComponent(body)}`;
+  const q=(r.cc?('cc='+encodeURIComponent(r.cc)+'&'):'')+
+    'subject='+encodeURIComponent('Advanced Home Services Invoice No '+g.no)+
+    '&body='+encodeURIComponent(body);
+  window.location.href='mailto:'+r.to+'?'+q;
   recordSent(g);
   toast('PDF saved. Attach it in the email that just opened.');
   resetSendButton();
@@ -880,7 +1077,8 @@ function openSent(id){
   resetSendButton();
   editingPendingId=null;
   compute();
-  $('sheet').scrollIntoView({behavior:'smooth',block:'start'});
+  syncFormFromSheet();
+  scrollToEntry();
   toast('Opened No '+s.no+'. Signature not stored, have the customer sign again.');
 }
 
@@ -904,7 +1102,7 @@ function reopenPending(id){const p=loadPending().find(x=>x.id===id);if(!p)return
     $('partRows').innerHTML='';(p.parts||[]).forEach(x=>addPart(x.q,x.it,x.am));ensureRows(Math.max(11,(p.parts||[]).length));}
   else{$('svcName').value=p.name||'';$('fWO').value=p.wo||'';$('invNo').value=p.no||peekNum();}
   setStatus('pending');clearSignature();resetSendButton();compute();
-  $('sheet').scrollIntoView({behavior:'smooth',block:'start'});toast('Reopened No '+p.no);}
+  syncFormFromSheet();scrollToEntry();toast('Reopened No '+p.no);}
 function completePending(id){savePending(loadPending().filter(x=>x.id!==id));renderPending();toast('Marked done. Bill it.');}
 function removePending(id){savePending(loadPending().filter(x=>x.id!==id));renderPending();toast('Removed');}
 
@@ -923,7 +1121,194 @@ function saveAndNew(){
   clearSignature();
   invalidatePdfCache();resetSendButton();
   setStatus('completed');$('invNo').value=peekNum();$('invTech').value=settings.tech;setDates();clearTranscript();compute();
+  syncFormFromSheet();
   window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ============ v5: the phone entry form ============
+   The paper sheet stays canonical. Every field up in the entry form writes
+   straight into its twin on the sheet, so gather(), compute(), the PDF, print,
+   the pending and completed lists and the saved fields all keep working on the
+   sheet exactly as before. syncFormFromSheet() copies the other way, and is
+   called whenever the sheet is refilled from storage, cleared, or pasted into. */
+const FORM_MAP=[
+  ['f_invTech','invTech'],
+  ['f_svcName','svcName'],['f_svcAddr','svcAddr'],['f_svcCity','svcCity'],['f_svcState','svcState'],['f_svcZip','svcZip'],['f_svcPhone','svcPhone'],
+  ['f_billName','billName'],['f_billAddr','billAddr'],['f_billCity','billCity'],['f_billState','billState'],['f_billZip','billZip'],['f_billPhone','billPhone'],
+  ['f_fDispatch','fDispatch'],['f_fWO','fWO'],['f_fAuth','fAuth'],
+  ['f_mfg1','mfg1'],['f_model1','model1'],['f_serial1','serial1'],
+  ['f_mfg2','mfg2'],['f_model2','model2'],['f_serial2','serial2'],
+  ['f_laborHrs','laborHrs'],['f_laborRate','laborRate'],
+  ['f_svcPerformed','svcPerformed'],
+  ['f_tPayRecv','tPayRecv'],['f_tLessInv','tLessInv']
+];
+const FORM_CHECK_MAP=[['f_cbGood','cbGood'],['f_cbFair','cbFair'],['f_cbPoor','cbPoor'],['f_cbReplace','cbReplace'],['f_cbCC','cbCC'],['f_cbCheck','cbCheck'],['f_cbCash','cbCash']];
+let formPartsVisible=3;
+function bindForm(){
+  FORM_MAP.forEach(function(pair){
+    const f=$(pair[0]),sh=$(pair[1]);if(!f||!sh)return;
+    f.addEventListener('input',function(){sh.value=f.value;compute();markPdfStale();});
+  });
+  FORM_CHECK_MAP.forEach(function(pair){
+    const f=$(pair[0]),sh=$(pair[1]);if(!f||!sh)return;
+    f.addEventListener('change',function(){sh.checked=f.checked;markPdfStale();});
+  });
+}
+function scrollToEntry(){const el=$('entryForm')||$('sheet');if(el)el.scrollIntoView({behavior:'smooth',block:'start'});}
+function partRowEls(){return [].slice.call(document.querySelectorAll('#partRows .p-row'));}
+function partsFilledCount(){
+  let last=0;
+  partRowEls().forEach(function(r,i){if(r.querySelector('.q').value||r.querySelector('.it').value||r.querySelector('.am').value)last=i+1;});
+  return last;
+}
+/* the form's parts list is a live view of the sheet's rows: it rebuilds from
+   #partRows and every keystroke writes back into the sheet input it mirrors. */
+function renderFormParts(){
+  const host=$('f_parts');if(!host)return;
+  let rows=partRowEls();
+  const want=Math.max(3,formPartsVisible,partsFilledCount()+1);
+  while(rows.length<want){addPart();rows=partRowEls();}
+  formPartsVisible=Math.min(want,rows.length);
+  host.innerHTML='';
+  rows.slice(0,formPartsVisible).forEach(function(r){
+    const q=r.querySelector('.q'),it=r.querySelector('.it'),am=r.querySelector('.am');
+    const div=document.createElement('div');div.className='fp-row';
+    div.innerHTML='<input class="fp-qty" inputmode="decimal" placeholder="Qty"><input class="fp-item" placeholder="Item"><input class="fp-amt" inputmode="decimal" placeholder="Amount">';
+    const fq=div.children[0],fi=div.children[1],fa=div.children[2];
+    fq.value=q.value;fi.value=it.value;fa.value=am.value;
+    fq.addEventListener('input',function(){q.value=fq.value;compute();markPdfStale();});
+    fi.addEventListener('input',function(){it.value=fi.value;compute();markPdfStale();});
+    fa.addEventListener('input',function(){am.value=fa.value;compute();markPdfStale();});
+    host.appendChild(div);
+  });
+}
+/* Add line shows one more row, and adds a fresh row to the sheet when the sheet
+   has run out of blank ones. */
+function addFormPart(){
+  formPartsVisible=Math.max(3,formPartsVisible,partsFilledCount()+1)+1;
+  if(partRowEls().length<formPartsVisible)addPart();
+  renderFormParts();
+  fitPreview();
+}
+function syncFormFromSheet(){
+  FORM_MAP.forEach(function(pair){const f=$(pair[0]),sh=$(pair[1]);if(f&&sh)f.value=sh.value;});
+  FORM_CHECK_MAP.forEach(function(pair){const f=$(pair[0]),sh=$(pair[1]);if(f&&sh)f.checked=sh.checked;});
+  const n=$('f_invNoView');if(n)n.textContent=$('invNo').value||'';
+  const d=$('f_invDateView');if(d)d.textContent=$('invDate').value||'';
+  formPartsVisible=3;
+  renderFormParts();
+  updateSigButton();
+  fitPreview();
+}
+
+/* ============ v5: the signature pop up ============
+   A big pad the customer signs with a finger. On Done the drawing is cropped to
+   the ink, scaled with its aspect kept, and drawn onto the sheet's own canvas,
+   so the PDF, the print and the preview all pick it up the way they always did. */
+let bigSig=null,bigSigDrawing=false,bigSigInk=false,bigSigBox=null;
+function openSigModal(){
+  const m=$('sigModal');if(!m)return;
+  m.classList.add('open');
+  setTimeout(initBigSigPad,40);
+}
+function closeSigModal(){const m=$('sigModal');if(m)m.classList.remove('open');}
+function initBigSigPad(){
+  const c=$('sigBigCanvas');if(!c)return;
+  const ratio=window.devicePixelRatio||1;
+  const w=c.clientWidth||320,h=c.clientHeight||230;
+  c.width=Math.round(w*ratio);c.height=Math.round(h*ratio);
+  const ctx=c.getContext('2d');ctx.setTransform(1,0,0,1,0,0);ctx.scale(ratio,ratio);
+  ctx.lineWidth=2.6;ctx.lineCap='round';ctx.lineJoin='round';ctx.strokeStyle='#0b2a4a';
+  bigSig={ctx:ctx,w:w,h:h,ratio:ratio};bigSigInk=false;bigSigBox=null;bigSigDrawing=false;
+  if(!c.dataset.bound){
+    c.addEventListener('pointerdown',bigSigStart);
+    c.addEventListener('pointermove',bigSigMove);
+    c.addEventListener('pointerup',bigSigEnd);
+    c.addEventListener('pointercancel',bigSigEnd);
+    c.addEventListener('pointerleave',bigSigEnd);
+    c.dataset.bound='1';
+  }
+}
+function bigSigPos(e){const r=$('sigBigCanvas').getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top};}
+function noteBigInk(p){
+  const pad=4;
+  if(!bigSigBox)bigSigBox={x0:p.x-pad,y0:p.y-pad,x1:p.x+pad,y1:p.y+pad};
+  else{
+    bigSigBox.x0=Math.min(bigSigBox.x0,p.x-pad);bigSigBox.y0=Math.min(bigSigBox.y0,p.y-pad);
+    bigSigBox.x1=Math.max(bigSigBox.x1,p.x+pad);bigSigBox.y1=Math.max(bigSigBox.y1,p.y+pad);
+  }
+}
+function bigSigStart(e){
+  if(!bigSig)return;
+  e.preventDefault();bigSigDrawing=true;
+  const p=bigSigPos(e);bigSig.ctx.beginPath();bigSig.ctx.moveTo(p.x,p.y);
+  try{$('sigBigCanvas').setPointerCapture(e.pointerId);}catch(err){}
+}
+function bigSigMove(e){
+  if(!bigSigDrawing)return;
+  e.preventDefault();
+  const p=bigSigPos(e);bigSig.ctx.lineTo(p.x,p.y);bigSig.ctx.stroke();
+  bigSigInk=true;noteBigInk(p);
+}
+function bigSigEnd(e){if(!bigSigDrawing)return;bigSigDrawing=false;}
+function clearBigSignature(){if(!bigSig)return;bigSig.ctx.clearRect(0,0,bigSig.w,bigSig.h);bigSigInk=false;bigSigBox=null;}
+function finishSignature(){
+  if(!bigSigInk){toast('Have the customer sign first');return;}
+  const big=$('sigBigCanvas');
+  if(!sigCtxCache)initSignaturePad();
+  if(!sigCtxCache)return;
+  const ctx=sigCtxCache.ctx,cw=sigCtxCache.w,ch=sigCtxCache.h;
+  ctx.clearRect(0,0,cw,ch);
+  drawSigBaseline();
+  const r=bigSig?bigSig.ratio:1;
+  let sx=0,sy=0,sw=big.width,sh=big.height;
+  if(bigSigBox){
+    sx=Math.max(0,bigSigBox.x0*r);sy=Math.max(0,bigSigBox.y0*r);
+    sw=Math.min(big.width-sx,(bigSigBox.x1-bigSigBox.x0)*r);
+    sh=Math.min(big.height-sy,(bigSigBox.y1-bigSigBox.y0)*r);
+  }
+  if(!(sw>1)||!(sh>1)){sx=0;sy=0;sw=big.width;sh=big.height;}
+  const fit=Math.min((cw-6)/sw,(ch-12)/sh);
+  const dw=sw*fit,dh=sh*fit;
+  const dy=Math.max(0,(ch-10)-dh);
+  ctx.drawImage(big,sx,sy,sw,sh,3,dy,dw,dh);
+  sigHasInk=true;sigMoved=true;
+  stampSigned();
+  pdfCacheStale=true;clearTimeout(sendDebounceTimer);refreshPdfCache();
+  closeSigModal();updateSigButton();
+  toast('Signature captured');
+}
+function resignSignature(){clearSignature();clearBigSignature();openSigModal();}
+function updateSigButton(){
+  const b=$('sigBtn'),again=$('sigBtnState');if(!b)return;
+  if(sigHasInk){b.textContent='Signed';b.classList.remove('primary');b.classList.add('done');if(again)again.style.display='';}
+  else{b.textContent='Customer signature';b.classList.remove('done');b.classList.add('primary');if(again)again.style.display='none';}
+}
+
+/* ============ v5: the preview ============
+   At phone width the whole sheet is scaled down with a transform on a wrapper,
+   the wrapper is given the scaled height so nothing overlaps it, and the sheet
+   itself is read only. Past 900px wide it sits at full size and stays editable. */
+function applyPreviewMode(){
+  const phone=window.innerWidth<=900;
+  [].slice.call(document.querySelectorAll('#sheet input, #sheet textarea')).forEach(function(el){
+    if(el.type==='checkbox')return;
+    if(!el.dataset.ro)el.dataset.ro=el.readOnly?'1':'0';
+    el.readOnly=phone?true:(el.dataset.ro==='1');
+  });
+}
+function fitPreview(){
+  applyPreviewMode();
+  const outer=$('sheetScaleOuter'),inner=$('sheetScaleInner'),sheet=$('sheet'),scroll=$('sheetScroll');
+  if(!outer||!inner||!sheet||!scroll)return;
+  if(window.innerWidth>900){inner.style.transform='';outer.style.height='';return;}
+  const cs=window.getComputedStyle(scroll);
+  const avail=scroll.clientWidth-(parseFloat(cs.paddingLeft)||0)-(parseFloat(cs.paddingRight)||0);
+  const natW=sheet.scrollWidth||1040;
+  if(!(avail>0)||!(natW>0))return;
+  const sc=Math.min(1,(avail-1)/natW);
+  inner.style.transform='scale('+sc+')';
+  outer.style.height=Math.ceil(sheet.scrollHeight*sc)+'px';
 }
 
 /* ============ print: force one landscape page ============ */
@@ -934,10 +1319,20 @@ let toastT;function toast(m){const t=$('toast');t.textContent=m;t.classList.add(
 $('micBtn').addEventListener('click',()=>listening?stopListening():startListening());
 ['laborHrs','laborRate','tPayRecv','tLessInv'].forEach(id=>$(id).addEventListener('input',compute));
 $('billName').value=settings.warranty||'';
-window.addEventListener('keydown',e=>{if(e.key==='Escape')closeSettings();});
+window.addEventListener('keydown',e=>{if(e.key==='Escape'){closeSettings();closeSigModal();}});
 /* any change to a form field marks the cached PDF stale and queues a background rebuild */
 $('sheet').addEventListener('input',markPdfStale);
 $('custEmail').addEventListener('input',markPdfStale);
 $('invNo').value=peekNum();$('invTech').value=settings.tech;setDates();ensureRows(11);setStatus('completed');compute();renderPending();renderSent();initSignaturePad();renderCompanyAddress();
+/* v5: wire the entry form to the sheet, fill it from the sheet, and size the preview */
+bindForm();
+$('sheet').addEventListener('change',function(){if(window.innerWidth>900)syncFormFromSheet();});
+syncFormFromSheet();
+fitPreview();
+let fitTimer=null;
+window.addEventListener('resize',function(){clearTimeout(fitTimer);fitTimer=setTimeout(fitPreview,120);});
+window.addEventListener('orientationchange',function(){setTimeout(fitPreview,320);});
+window.addEventListener('load',function(){setTimeout(fitPreview,120);});
+setTimeout(fitPreview,400);
 </script>
 </body></html>
