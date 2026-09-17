@@ -1,6 +1,6 @@
 <!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Advanced Home Services Invoice</title>
-<!-- v3 (2026-09-16): built for a technician on an iPhone. Adds a finger-drawn signature pad (canvas, copied into the PDF/print via html2canvas onclone), a Send invoice button that shares the PDF through the iOS share sheet when available and falls back to saving the PDF plus a mailto with the summary, a Sent invoices list (signature not saved) above Pending, a rewritten DispatchMe/Frontdoor paste reader that understands the job-page, confirmation-email and work-order-email layouts, and plain-language labels throughout. v2 untouched in the vault original. v4 (2026-09-17, his review): sheet at the very top, header and paste reader retired from view, customer email and a bigger Completed/Pending toggle below the sheet, a blue Mark as pending button left of Send that files the whole form into the Pending list, Pending listed above Sent. -->
+<!-- v3 (2026-09-16): built for a technician on an iPhone. Adds a finger-drawn signature pad (canvas, copied into the PDF/print via html2canvas onclone), a Send invoice button that shares the PDF through the iOS share sheet when available and falls back to saving the PDF plus a mailto with the summary, a Sent invoices list (signature not saved) above Pending, a rewritten DispatchMe/Frontdoor paste reader that understands the job-page, confirmation-email and work-order-email layouts, and plain-language labels throughout. v2 untouched in the vault original. v4 (2026-09-17, his review): sheet at the very top, header and paste reader retired from view, customer email and a bigger Completed/Pending toggle below the sheet, a blue Mark as pending button left of Send that files the whole form into the Pending list, Pending listed above Sent. v4.1 (2026-09-17, same review): three main buttons, Mark as pending, Send invoice, green Mark completed, which files the invoice under Completed invoices and starts the next; Print, Save PDF and Office copy moved to a smaller second row. -->
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="AHS Invoice">
@@ -198,6 +198,10 @@ textarea.paste:focus{border-color:var(--a);outline:none}
 }
 .brand h1{font-family:var(--disp);font-weight:700;text-transform:uppercase;letter-spacing:.02em}
 .btn.cta{background:var(--yellow);color:#181c22;font-weight:800}
+.btn.done{background:#1f9d55;color:#fff;font-weight:800}
+.btn.done:hover{filter:brightness(1.06)}
+.actions.secondary{margin-top:10px}
+.actions.secondary .btn{padding:9px 13px;font-size:13px}
 .btn.cta:hover{filter:brightness(1.04)}
 </style></head><body>
 
@@ -354,13 +358,15 @@ textarea.paste:focus{border-color:var(--a);outline:none}
 <div class="wrap chrome">
   <div class="fld" style="max-width:340px;margin-top:4px"><label>Customer email (for sending)</label><input id="custEmail" placeholder="customer@example.com"></div>
   <div class="seg big"><button id="segCompleted" class="on" onclick="setStatus('completed')">Completed</button><button id="segPending" onclick="setStatus('pending')">Pending</button></div>
-  <div class="actions">
+  <div class="actions main">
     <button class="btn primary" id="pendBtn" onclick="markPending()">Mark as pending</button>
     <button class="btn cta" id="sendBtn" onclick="sendInvoice()">Send invoice</button>
+    <button class="btn done" id="doneBtn" onclick="markCompleted()">Mark completed</button>
+  </div>
+  <div class="actions secondary">
     <button class="btn ghost" onclick="window.print()">Print</button>
     <button class="btn ghost" onclick="downloadPDF()">Save PDF</button>
     <button class="btn ghost" onclick="emailBilling()">Office copy by email</button>
-    <button class="btn ghost" onclick="saveAndNew()">Done, start next invoice</button>
   </div>
 
   <div class="card" style="margin-top:18px">
@@ -370,9 +376,9 @@ textarea.paste:focus{border-color:var(--a);outline:none}
   </div>
 
   <div class="card" style="margin-top:18px">
-    <h2>Sent invoices <span id="sentCount" style="color:var(--faint)"></span></h2>
-    <p class="sub">Copies of invoices already sent or emailed, newest first. Signatures are not saved here; if you reopen one, have the customer sign again before sending.</p>
-    <div id="sentList"><div class="pending-empty">No sent invoices yet.</div></div>
+    <h2>Completed invoices <span id="sentCount" style="color:var(--faint)"></span></h2>
+    <p class="sub">Invoices marked completed or sent, newest first. Signatures are not saved here; if you reopen one, have the customer sign again before sending.</p>
+    <div id="sentList"><div class="pending-empty">No completed invoices yet.</div></div>
   </div>
 
   <div style="margin:6px 0 18px"><button class="settings" onclick="openSettings()">Business info</button></div>
@@ -854,11 +860,11 @@ function recordSent(g){
 }
 function renderSent(){
   const list=loadSent(),el=$('sentList');$('sentCount').textContent=list.length?('· '+list.length):'';
-  if(!list.length){el.innerHTML='<div class="pending-empty">No sent invoices yet.</div>';return;}
+  if(!list.length){el.innerHTML='<div class="pending-empty">No completed invoices yet.</div>';return;}
   el.innerHTML=list.map(s=>{
     const d=new Date(s.sentAt);
     const when=d.toLocaleDateString('en-US',{month:'2-digit',day:'2-digit',year:'numeric'})+' '+d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
-    return `<div class="pending-item"><div class="pi-main"><div class="pi-cust">${escapeHtml(s.name)}</div><div class="pi-meta">No ${escapeHtml(s.no)} · $${money(s.total)} · ${when}</div></div><div class="pi-actions"><button class="pi-btn" onclick="openSent('${s.id}')">Open</button></div></div>`;
+    return `<div class="pending-item"><div class="pi-main"><div class="pi-cust">${escapeHtml(s.name)}</div><div class="pi-meta">No ${escapeHtml(s.no)} · $${money(s.total)} · ${s.completedOnly?'completed':'sent'} ${when}</div></div><div class="pi-actions"><button class="pi-btn" onclick="openSent('${s.id}')">Open</button></div></div>`;
   }).join('');
 }
 function openSent(id){
@@ -904,6 +910,7 @@ function removePending(id){savePending(loadPending().filter(x=>x.id!==id));rende
 
 /* ============ save & new ============ */
 function markPending(){setStatus('pending');saveAndNew();}
+function markCompleted(){setStatus('completed');const g=gather();if(!loadSent().some(s=>s.no===g.no))recordSent(Object.assign({},g,{completedOnly:true}));saveAndNew();}
 function saveAndNew(){
   const g=gather();
   if(g.status==='pending'){if($('invNo').value===peekNum())consumeNum();upsertPending(g);toast('Held as pending');}
